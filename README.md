@@ -26,4 +26,6 @@ This is a simple resume screener application built with FastAPI. The application
 
 ### Output
 
+!image[alt](https://github.com/sobanaramakrishnan/infosys/blob/53fa6c0cd3b2c29170767becf5caabbf9165807c/resume%20screener/output.png)
+
 
