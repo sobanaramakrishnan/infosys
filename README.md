@@ -24,4 +24,6 @@ This is a simple resume screener application built with FastAPI. The application
   ```bash
   pip install -r requirements.txt
 
+### Output
+
 
