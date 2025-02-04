@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIvocate</title>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #121212;
+            color: #fff;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #00c9ff;
+            text-shadow: 2px 2px 10px rgba(0, 201, 255, 0.5);
+        }
+
+        form, div {
+            margin: 20px auto;
+            padding: 20px;
+            background: #1e1e1e;
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px rgba(0, 201, 255, 0.2);
+            max-width: 500px;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            border: none;
+            outline: none;
+            background: #333;
+            color: #fff;
+        }
+
+        button {
+            padding: 12px 20px;
+            margin-top: 10px;
+            border: none;
+            cursor: pointer;
+            background: linear-gradient(45deg, #00c9ff, #92fe9d);
+            color: #000;
+            font-weight: bold;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0px 0px 10px rgba(0, 201, 255, 0.6);
+        }
+
+        .question {
+            font-weight: bold;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-left: 5px solid #00c9ff;
+        }
+
+        #recordedAudio {
+            margin-top: 10px;
+            width: 100%;
+            border-radius: 5px;
+        }
+
+        #feedback {
+            font-size: 1.2rem;
+            color: #92fe9d;
+            text-shadow: 1px 1px 8px rgba(146, 254, 157, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <h1>AIvocate</h1>
+
+    <form id="jobForm">
+        <h3>Upload Job Description</h3>
+        <input type="text" name="job_description" placeholder="Enter Job Description" required>
+        <button type="submit">Generate Questions</button>
+    </form>
+
+    <div id="questions"></div>
+
+    <form id="answerForm">
+        <h3>Answer the Questions</h3>
+        <select id="questionSelect" name="question_id"></select>
+        <textarea name="answer" id="answer" placeholder="Type your answer"></textarea>
+        <button type="submit">Submit Answer</button>
+    </form>
+
+    <h3>Or Record Your Answer</h3>
+    <button id="startRecording">🎤 Start Recording</button>
+    <audio id="recordedAudio" controls></audio>
+    <button id="submitVoice">Submit Voice Answer</button>
+
+    <h3>AI Feedback</h3>
+    <p id="feedback"></p>
+
+    <script>
+        document.getElementById("jobForm").onsubmit = async function (e) {
+            e.preventDefault();
+            let formData = new FormData(e.target);
+            let response = await fetch("/generate_questions/", { method: "POST", body: formData });
+            let data = await response.json();
+            
+            let questionsDiv = document.getElementById("questions");
+            questionsDiv.innerHTML = "";
+            let select = document.getElementById("questionSelect");
+            select.innerHTML = "";
+            
+            data.questions.forEach((q, i) => {
+                let div = document.createElement("div");
+                div.className = "question";
+                div.textContent = q;
+                questionsDiv.appendChild(div);
+
+                let option = document.createElement("option");
+                option.value = i + 1;  
+                option.textContent = q;
+                select.appendChild(option);
+            });
+        };
+
+        document.getElementById("answerForm").onsubmit = async function (e) {
+            e.preventDefault();
+            let formData = new FormData(e.target);
+            let response = await fetch("/submit_answer/", { method: "POST", body: formData });
+            let data = await response.json();
+            document.getElementById("feedback").textContent = "AI Feedback: " + data.feedback;
+        };
+
+        let recorder, audioBlob;
+
+        document.getElementById("startRecording").onclick = async function () {
+            let stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            recorder = new MediaRecorder(stream);
+            let audioChunks = [];
+
+            recorder.ondataavailable = (event) => audioChunks.push(event.data);
+            recorder.onstop = async () => {
+                audioBlob = new Blob(audioChunks, { type: "audio/wav" });
+                document.getElementById("recordedAudio").src = URL.createObjectURL(audioBlob);
+            };
+
+            recorder.start();
+            setTimeout(() => recorder.stop(), 5000);
+        };
+
+        document.getElementById("submitVoice").onclick = async function () {
+            let formData = new FormData();
+            formData.append("question_id", document.getElementById("questionSelect").value);
+            formData.append("voice", audioBlob);
+
+            let response = await fetch("/submit_answer/", { method: "POST", body: formData });
+            let data = await response.json();
+            document.getElementById("feedback").textContent = "AI Feedback: " + data.feedback;
+        };
+    </script>
+</body>
+</html>
