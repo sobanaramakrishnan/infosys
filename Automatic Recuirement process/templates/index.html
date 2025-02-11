@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automatic Recruitment Process</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: #fff;
+        }
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 40px 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            width: 90%;
+            max-width: 600px;
+        }
+        .container h1 {
+            margin-bottom: 30px;
+            font-size: 32px;
+            font-weight: bold;
+            color: #f8f8f8;
+        }
+        .button {
+            display: inline-block;
+            margin: 10px;
+            padding: 15px 45px;
+            font-size: 18px;
+            color: #fff;
+            background: linear-gradient(135deg, #00c6ff, #0072ff);
+            border: none;
+            border-radius: 50px;
+            text-decoration: none;
+            cursor: pointer;
+            box-shadow: 0 6px 15px rgba(0, 198, 255, 0.4);
+            transition: all 0.3s ease-in-out;
+        }
+        .button:hover {
+            background: linear-gradient(135deg, #0072ff, #00c6ff);
+            box-shadow: 0 8px 20px rgba(0, 198, 255, 0.6);
+            transform: translateY(-5px);
+        }
+        .button:active {
+            transform: translateY(3px);
+            box-shadow: 0 4px 10px rgba(0, 198, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Automatic Recruitment Process</h1>
+        <a href="/ats_checker" class="button">ATS Checker</a>
+        <a href="/resume_screener" class="button">Resume Screening</a>
+        <a href="/aivocate" class="button">Start AIvocate</a>
+    </div>
+</body>
+</html>

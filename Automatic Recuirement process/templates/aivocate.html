@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIvocate </title>
+    <style>
+ /* General Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    color: white;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.container {
+    width: 90%;
+    max-width: 500px;
+    padding: 25px;
+    background: rgba(20, 20, 20, 0.9);
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.container:hover {
+    transform: scale(1.02);
+}
+
+h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    background: linear-gradient(45deg, #ff9a9e, #fad0c4, #fbc2eb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 2px 2px rgba(255, 255, 255, 0.3);
+}
+
+label {
+    display: block;
+    margin: 15px 0 5px;
+    font-weight: bold;
+    text-align: left;
+    color: #c4b5fd;
+}
+
+input, textarea, button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 5px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1em;
+    outline: none;
+    transition: all 0.3s ease-in-out;
+}
+
+input, textarea {
+    background: rgba(50, 50, 50, 0.8);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: 0.3s ease-in-out;
+}
+
+input::placeholder, textarea::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+    font-style: italic;
+}
+
+input:focus, textarea:focus {
+    background: rgba(70, 70, 70, 0.9);
+    border: 2px solid #c084fc;
+}
+
+button {
+    background: linear-gradient(90deg, #9333ea, #4c1d95);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    border-radius: 50px;
+}
+
+button:hover {
+    background: linear-gradient(90deg, #4c1d95, #9333ea);
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(147, 51, 234, 0.5);
+}
+
+#response {
+    margin-top: 20px;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #a78bfa;
+}
+
+#answerSection {
+    display: none;
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 768px) {
+    .container {
+        width: 100%;
+    }
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AIvocate </h1>
+        <form id="interviewForm">
+            <label for="job_description">Job Description:</label>
+            <textarea id="job_description" required placeholder="Enter job description..."></textarea>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" required placeholder="Enter your email">
+
+            <label for="resume">Upload Resume:</label>
+            <input type="file" id="resume" accept=".pdf,.doc,.docx" required>
+
+            <button type="submit">Start Interview</button>
+        </form>
+
+        <div id="response"></div>
+
+        <div id="answerSection">
+            <h2>Interview Question</h2>
+            <p id="question"></p>
+            <textarea id="answer" placeholder="Your Answer"></textarea>
+            <button id="submitAnswer">Submit Answer</button>
+            <button id="voiceAnswer">🎤 Answer with Voice</button>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("interviewForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            let formData = new FormData();
+            formData.append("job_description", document.getElementById("job_description").value);
+            formData.append("email", document.getElementById("email").value);
+            formData.append("resume", document.getElementById("resume").files[0]);
+
+            fetch("/start_interview", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("response").innerHTML = "Interview Started!";
+                document.getElementById("answerSection").style.display = "block";
+                document.getElementById("question").innerText = data.question;
+                document.getElementById("submitAnswer").dataset.interviewId = data.interview_id;
+            })
+            .catch(error => console.error("Error:", error));
+        });
+
+        document.getElementById("voiceAnswer").addEventListener("click", function () {
+            let recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = "en-US";
+            recognition.start();
+            
+            recognition.onresult = function (event) {
+                let voiceText = event.results[0][0].transcript;
+                document.getElementById("answer").value = voiceText;
+            };
+            
+            recognition.onerror = function (event) {
+                console.error("Speech recognition error:", event.error);
+            };
+        });
+
+        document.getElementById("submitAnswer").addEventListener("click", function() {
+            let interviewId = this.dataset.interviewId;
+            let userAnswer = document.getElementById("answer").value;
+
+            fetch("/answer", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ interview_id: interviewId, answer: userAnswer })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    document.getElementById("response").innerText = data.message;
+                } else {
+                    document.getElementById("question").innerText = data.question;
+                    document.getElementById("answer").value = "";
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        });
+    </script>
+</body>
+</html>

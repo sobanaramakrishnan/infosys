@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Screening</title>
+    <style>
+        /* Background Styling */
+        body {
+            font-family: 'Poppins', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: radial-gradient(circle, #0f2027, #203a43, #2c5364);
+            overflow: hidden;
+        }
+
+        /* Glowing Glassmorphic Container */
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            width: 380px;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: fadeIn 1s ease-in-out;
+        }
+
+        h2 {
+            color: #00e6e6;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        input, textarea, button {
+            width: 100%;
+            margin: 10px 0;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        textarea, input {
+            background: rgba(0, 0, 0, 0.4);
+            color: #fff;
+            outline: none;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        textarea::placeholder, input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Neon Glow Button */
+        button {
+            background: linear-gradient(135deg, #ff00ff, #ff0099);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.7);
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #ff0099, #ff00ff);
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(255, 0, 255, 1);
+        }
+
+        /* Result Styling */
+        h3 {
+            margin-top: 15px;
+            font-size: 20px;
+            color: #00e6e6;
+            font-weight: bold;
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        /* Floating Neon Particles */
+        .particle {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: rgba(0, 255, 255, 0.7);
+            border-radius: 50%;
+            animation: floatUp linear infinite;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(100vh);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-10vh);
+                opacity: 0;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Resume Screening</h2>
+        <form id="resumeForm">
+            <textarea id="job_desc" name="job_desc" placeholder="Enter Job Description" required></textarea>
+            <input type="file" id="resume" name="resume" accept=".pdf" required>
+            <input type="email" id="email" name="email" placeholder="Enter Email" required>
+            <input type="text" id="name" name="name" placeholder="Enter Your Name" required>
+
+            <button type="submit">Submit</button>
+        </form>
+        <h3 id="result"></h3>
+    </div>
+
+    <script>
+        // Floating Particles Effect
+        function createParticles(num) {
+            for (let i = 0; i < num; i++) {
+                let particle = document.createElement("div");
+                particle.classList.add("particle");
+                document.body.appendChild(particle);
+                particle.style.left = Math.random() * window.innerWidth + "px";
+                particle.style.animationDuration = Math.random() * 5 + 5 + "s";
+                particle.style.animationDelay = Math.random() * 5 + "s";
+            }
+        }
+        createParticles(50);
+
+        document.getElementById("resumeForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            let formData = new FormData(this);
+            
+            fetch("/", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("result").innerText = "Match Percentage: " + data.match + "%";
+            })
+            .catch(error => console.error("Error:", error));
+        });
+    </script>
+</body>
+</html>
